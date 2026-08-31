@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: Jam Digital Masjid API
+  version: 1.0.0
+servers:
+  - url: https://{apiHost}/api/v1
+    variables:
+      apiHost:
+        default: api.example.local
+paths:
+  /health:
+    get:
+      responses:
+  /admin/mosques/{mosqueId}/pairing-tokens:
+    post:
+      security:
+        - AdminAuth: []
+      parameters:
+        - {name: mosqueId, in: path, required: true, schema: {type: string}}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: {type: string}
+                  expiresAt: {type: string, format: date-time}
+  /devices/pair:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deviceIdentifier, token]
+              properties:
+                deviceIdentifier: {type: string}
+                token: {type: string}
+                deviceName: {type: string, nullable: true}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apiKey: {type: string}
+                  mosqueId: {type: string}
+        '400': {description: Bad Request}
+        '429': {description: Too Many Requests}
+  /mosques/{mosqueId}/prayer-schedules:
+    get:
+      security:
+        - DeviceApiKey: []
+      parameters:
+        - {name: mosqueId, in: path, required: true, schema: {type: string}}
+        - {name: date, in: query, required: true, schema: {type: string, format: date}}
+      responses:
+        '200':
+          description: Normalized schedule
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PrayerSchedule'}
+  /devices/{deviceId}/heartbeat:
+    post:
+      security:
+        - DeviceApiKey: []
+      parameters:
+        - {name: deviceId, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  configVersion: {type: integer}
+                  syncRequired: {type: boolean}
+        '401': {description: Unauthorized}
+  /devices/{deviceId}/sync:
+    post:
+      parameters:
+        - {name: deviceId, in: path, required: true, schema: {type: string}}
+      responses:
+        '200': {description: Sync result}
+components:
+  schemas:
+    PrayerSchedule:
+      type: object
+      required: [date, subuh, dzuhur, ashar, maghrib, isya, source]
+      properties:
+        date: {type: string, format: date}
+        imsak: {type: string, nullable: true}
+        subuh: {type: string}
+        syuruq: {type: string, nullable: true}
+        dzuhur: {type: string}
+        ashar: {type: string}
+        maghrib: {type: string}
+        isya: {type: string}
+        source:
+          type: object
+          properties:
+            provider: {type: string}
+            reference: {type: string, nullable: true}
+            version: {type: string, nullable: true}
+            retrievedAt: {type: string, format: date-time, nullable: true}
+            validationStatus: {type: string}
+            calculationMethod: {type: string, nullable: true}
+  securitySchemes:
+    AdminAuth:
+      type: http
+      scheme: bearer
+      description: Admin session JWT
+    DeviceApiKey:
+      type: http
+      scheme: bearer
+      description: Long-lived Device API Key
