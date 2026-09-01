@@ -15,7 +15,7 @@ import {
   Clock,
   Image as ImageIcon
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 const sidebarNavItems = [
@@ -31,6 +31,18 @@ const sidebarNavItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/login";
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  if (!isAuthenticated) return null;
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -74,10 +86,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         <div className="border-t border-border/50 p-4">
-          <Link href="/login" className="flex items-center rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
+          <button 
+            onClick={() => {
+              localStorage.removeItem("token");
+              localStorage.removeItem("mosqueId");
+              window.location.href = "/login";
+            }} 
+            className="w-full flex items-center rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+          >
             <LogOut className="mr-3 h-5 w-5" />
             Sign Out
-          </Link>
+          </button>
         </div>
       </aside>
 

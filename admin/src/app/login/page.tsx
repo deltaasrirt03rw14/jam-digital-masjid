@@ -24,7 +24,7 @@ export default function LoginPage() {
     try {
       const data = await ApiAdapter.login(email, password);
       localStorage.setItem("token", data.access_token);
-      localStorage.setItem("mosqueId", data.mosqueId);
+      localStorage.setItem("mosqueId", data.mosque_id || data.mosqueId);
       router.push("/");
     } catch (err: any) {
       setError("Invalid credentials. Please check your email and password.");
