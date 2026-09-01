@@ -24,7 +24,7 @@ export interface ContentItem {
   priority: number;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 function getAuthHeaders() {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -36,7 +36,7 @@ function getAuthHeaders() {
 
 export const ApiAdapter = {
   login: async (email: string, password: string) => {
-    const res = await fetch(`${API_BASE_URL}/admin/auth/login`, {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -46,7 +46,7 @@ export const ApiAdapter = {
   },
 
   getMosqueConfig: async (mosqueId: string): Promise<MosqueConfig> => {
-    const res = await fetch(`${API_BASE_URL}/admin/mosques/${mosqueId}`, {
+    const res = await fetch(`${API_BASE_URL}/mosques/${mosqueId}`, {
       headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error("Failed to fetch mosque config");
@@ -54,7 +54,7 @@ export const ApiAdapter = {
   },
   
   updateMosqueConfig: async (mosqueId: string, data: Partial<MosqueConfig>): Promise<MosqueConfig> => {
-    const res = await fetch(`${API_BASE_URL}/admin/mosques/${mosqueId}`, {
+    const res = await fetch(`${API_BASE_URL}/mosques/${mosqueId}`, {
       method: "PUT",
       headers: getAuthHeaders(),
       body: JSON.stringify(data),

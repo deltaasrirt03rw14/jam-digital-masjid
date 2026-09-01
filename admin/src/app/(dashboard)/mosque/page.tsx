@@ -13,7 +13,10 @@ export default function MosqueConfigPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const mosqueId = localStorage.getItem("mosqueId") || "m1";
+    let mosqueId = localStorage.getItem("mosqueId");
+    if (!mosqueId || mosqueId === "m1") {
+      mosqueId = "403d70ae-5fa7-489e-86fc-8d370be5b47f";
+    }
     ApiAdapter.getMosqueConfig(mosqueId)
       .then(setConfig)
       .catch((err) => setError("Failed to load mosque configuration"))
@@ -24,7 +27,10 @@ export default function MosqueConfigPage() {
     if (!config) return;
     setSaving(true);
     try {
-      const mosqueId = localStorage.getItem("mosqueId") || "m1";
+      let mosqueId = localStorage.getItem("mosqueId");
+      if (!mosqueId || mosqueId === "m1") {
+        mosqueId = "403d70ae-5fa7-489e-86fc-8d370be5b47f";
+      }
       const updated = await ApiAdapter.updateMosqueConfig(mosqueId, config);
       setConfig(updated);
     } catch (e) {
