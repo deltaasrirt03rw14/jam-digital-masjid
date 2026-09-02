@@ -47,9 +47,9 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
         .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
         .build()
 
-    // Using the user's local IP address for testing
+    // Using the user's permanent Ngrok domain for production/testing
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://192.168.1.2:3000/")
+        .baseUrl("https://bonelike-tartness-patronize.ngrok-free.dev/")
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
