@@ -34,6 +34,15 @@ function getAuthHeaders() {
   };
 }
 
+function handleResponse(res) {
+  if (res.status === 401) {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('mosqueId');
+      window.location.href = '/login';
+    }
+  }
+}
 export const ApiAdapter = {
   login: async (email: string, password: string) => {
     const res = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -41,6 +50,7 @@ export const ApiAdapter = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Login failed");
     return res.json(); // { access_token, mosqueId }
   },
@@ -49,6 +59,7 @@ export const ApiAdapter = {
     const res = await fetch(`${API_BASE_URL}/mosques/${mosqueId}`, {
       headers: getAuthHeaders(),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to fetch mosque config");
     return res.json();
   },
@@ -59,6 +70,7 @@ export const ApiAdapter = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to update mosque config");
     return res.json();
   },
@@ -67,6 +79,7 @@ export const ApiAdapter = {
     const res = await fetch(`${API_BASE_URL}/admin/devices`, {
       headers: getAuthHeaders(),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to fetch devices");
     return res.json();
   },
@@ -75,6 +88,7 @@ export const ApiAdapter = {
     const res = await fetch(`${API_BASE_URL}/contents`, {
       headers: getAuthHeaders(),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to fetch contents");
     return res.json();
   },
@@ -84,6 +98,7 @@ export const ApiAdapter = {
       method: "POST",
       headers: getAuthHeaders(),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to generate pairing token");
     return res.json();
   },
@@ -93,6 +108,7 @@ export const ApiAdapter = {
       method: "POST",
       headers: getAuthHeaders(),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to revoke device");
     return res.json();
   },
@@ -101,6 +117,7 @@ export const ApiAdapter = {
     const res = await fetch(`${API_BASE_URL}/media`, {
       headers: getAuthHeaders(),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to fetch media");
     return res.json();
   },
@@ -117,6 +134,7 @@ export const ApiAdapter = {
       headers, // No Content-Type, browser will set multipart/form-data with boundary
       body: formData,
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to upload media");
     return res.json();
   },
@@ -126,6 +144,7 @@ export const ApiAdapter = {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to delete media");
   },
 
@@ -135,6 +154,7 @@ export const ApiAdapter = {
       headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to create content");
     return res.json();
   },
@@ -143,6 +163,7 @@ export const ApiAdapter = {
     const res = await fetch(`${API_BASE_URL}/contents`, {
       headers: getAuthHeaders(),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to fetch contents");
     return res.json();
   },
@@ -153,6 +174,7 @@ export const ApiAdapter = {
       headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to update content");
     return res.json();
   },
@@ -162,6 +184,7 @@ export const ApiAdapter = {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
+    handleResponse(res);
     if (!res.ok) throw new Error("Failed to delete content");
   }
 };
