@@ -96,24 +96,24 @@ data class HeartbeatResponseDto(
 )
 
 interface JdmApiService {
-    @POST("api/v1/devices/pair")
+    @POST("devices/pair")
     suspend fun pairDevice(
         @Body request: PairDeviceRequestDto
     ): Response<PairDeviceResponseDto>
 
-    @GET("api/v1/mosques/{mosqueId}/prayer-schedules")
+    @GET("mosques/{mosqueId}/prayer-schedules")
     suspend fun getPrayerSchedule(
         @Path("mosqueId") mosqueId: String,
         @Query("date") date: String
     ): Response<PrayerScheduleDto>
 
-    @GET("api/v1/devices/{deviceId}/sync")
+    @GET("devices/{deviceId}/sync")
     suspend fun getSyncData(
         @Path("deviceId") deviceId: String,
         @Header("If-None-Match") etag: String? = null
     ): Response<SyncResponseDto>
 
-    @POST("api/v1/devices/{deviceId}/heartbeat")
+    @POST("devices/{deviceId}/heartbeat")
     suspend fun sendHeartbeat(
         @Path("deviceId") deviceId: String
     ): Response<HeartbeatResponseDto>
