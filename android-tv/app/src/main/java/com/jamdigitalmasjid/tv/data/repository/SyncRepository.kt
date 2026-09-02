@@ -62,7 +62,8 @@ class SyncRepository(
     companion object {
         private const val TAG = "SyncRepository"
 
-        val DEVICE_IDENTIFIER_KEY = stringPreferencesKey("device_identifier")
+        // Must match DeviceCredentialStoreImpl.KEY_DEVICE_ID
+        val DEVICE_IDENTIFIER_KEY = stringPreferencesKey("device_uuid")
         val SYNC_ETAG_KEY         = stringPreferencesKey("sync_etag")
         val SYNC_LAST_SUCCESS_KEY = longPreferencesKey("last_synced_at")
 
