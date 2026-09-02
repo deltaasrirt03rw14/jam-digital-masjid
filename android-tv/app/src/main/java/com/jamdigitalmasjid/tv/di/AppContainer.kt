@@ -47,9 +47,9 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
         .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
         .build()
 
-    // Using a placeholder URL, this could be configured via datastore or build config
+    // Using the user's local IP address for testing
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.example.local/")
+        .baseUrl("http://192.168.1.2:3000/")
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
