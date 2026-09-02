@@ -13,7 +13,7 @@ interface DeviceCredentialStore {
     suspend fun getOrCreateDeviceId(): String
     val apiKeyFlow: Flow<String?>
     suspend fun getApiKey(): String?
-    suspend fun saveApiKey(apiKey: String)
+    suspend fun saveApiKey(apiKey: String, mosqueId: String? = null)
     suspend fun clearApiKey()
 }
 
@@ -47,15 +47,19 @@ class DeviceCredentialStoreImpl(
         return dataStore.data.first()[KEY_API_KEY]
     }
 
-    override suspend fun saveApiKey(apiKey: String) {
+    override suspend fun saveApiKey(apiKey: String, mosqueId: String?) {
         dataStore.edit { prefs ->
             prefs[KEY_API_KEY] = apiKey
+            if (mosqueId != null) {
+                prefs[stringPreferencesKey("mosque_id")] = mosqueId
+            }
         }
     }
 
     override suspend fun clearApiKey() {
         dataStore.edit { prefs ->
             prefs.remove(KEY_API_KEY)
+            prefs.remove(stringPreferencesKey("mosque_id"))
         }
     }
 }

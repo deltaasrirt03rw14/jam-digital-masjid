@@ -43,7 +43,7 @@ class DeviceAuthRepository(
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
-                    credentialStore.saveApiKey(body.apiKey)
+                    credentialStore.saveApiKey(body.apiKey, body.mosqueId)
                     _authState.value = DeviceAuthState.Authenticated(deviceId)
                 } else {
                     _authState.value = DeviceAuthState.Error(deviceId, "Empty response from server")

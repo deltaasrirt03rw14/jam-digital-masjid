@@ -208,6 +208,10 @@ class SyncRepository(
         val mosqueId = payload.mosque.id
         val now = System.currentTimeMillis()
 
+        dataStore.edit { settings ->
+            settings[stringPreferencesKey("mosque_id")] = mosqueId
+        }
+
         executeTransaction(database) {
             // 1. Mosque config (upsert)
             database.syncedMosqueConfigDao().upsert(
