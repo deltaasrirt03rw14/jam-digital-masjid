@@ -18,14 +18,19 @@ class AuthInterceptor(private val dataStore: DataStore<Preferences>) : Intercept
         val apiKey = runBlocking {
             dataStore.data.first()[stringPreferencesKey("device_api_key")]
         }
-
-        val authenticatedRequest = if (apiKey != null) {
-            request.newBuilder()
-                .header("Authorization", "Bearer $apiKey")
-                .build()
-        } else {
-            request
+        val deviceId = runBlocking {
+            dataStore.data.first()[stringPreferencesKey("device_uuid")]
         }
+
+        val requestBuilder = request.newBuilder()
+        if (apiKey != null) {
+            requestBuilder.header("Authorization", "Bearer $apiKey")
+        }
+        if (deviceId != null) {
+            requestBuilder.header("X-Device-Id", deviceId)
+        }
+        
+        val authenticatedRequest = requestBuilder.build()
 
         return chain.proceed(authenticatedRequest)
     }
