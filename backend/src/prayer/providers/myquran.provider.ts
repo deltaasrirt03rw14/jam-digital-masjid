@@ -8,7 +8,7 @@ import { firstValueFrom } from "rxjs";
 @Injectable()
 export class MyQuranProvider implements PrayerProvider {
   private readonly logger = new Logger(MyQuranProvider.name);
-  private readonly baseUrl = "https://api.myquran.com/v3/sholat/jadwal";
+  private readonly baseUrl = "https://api.myquran.com/v2/sholat/jadwal";
 
   constructor(private readonly httpService: HttpService) {}
 
