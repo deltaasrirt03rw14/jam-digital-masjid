@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CalendarClock, CheckCircle2, Clock } from "lucide-react";
+import { ApiAdapter } from "@/lib/api/adapter";
 
 export default function PrayerConfigPage() {
   const [loading, setLoading] = useState(true);
@@ -43,7 +44,7 @@ export default function PrayerConfigPage() {
   }, []);
 
   const getPrayerStatus = () => {
-    if (!schedule || !config) return { current: null, next: null };
+    if (!schedule || !config) return { current: null, next: null, times: [] };
     const tz = config.timezone || "Asia/Jakarta";
     
     const nowStr = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(currentTime);

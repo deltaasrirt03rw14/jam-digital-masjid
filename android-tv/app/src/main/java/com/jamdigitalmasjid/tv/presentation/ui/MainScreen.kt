@@ -6,6 +6,10 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.jamdigitalmasjid.tv.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
@@ -70,19 +74,17 @@ fun MainScreen(viewModel: MainViewModel, playbackViewModel: PlaybackViewModel) {
         if (syncStatus is SyncStatus.Success || syncStatus is SyncStatus.NotModified) {
             playbackViewModel.reloadContents()
         }
+    }
+
     val mosqueConfig by viewModel.syncedMosqueConfig.collectAsState()
     val runningTextList by viewModel.syncedRunningText.collectAsState()
 
-    if (state.activeState == PrayerState.PRE_ADHAN || state.activeState == PrayerState.ADHAN || state.activeState == PrayerState.IQOMAH || state.activeState == PrayerState.PRAYER_MODE) {
-        PreAdhanScreen(state = state)
-    } else {
-        NormalScreen(
-            state = state,
-            syncStatus = syncStatus,
-            playbackViewModel = playbackViewModel,
-            mosqueConfig = mosqueConfig,
-            runningTextList = runningTextList
-        )
+    when (state.activeState) {
+        PrayerState.PRAYER_MODE -> PrayerModeScreen()
+        PrayerState.ADHAN -> AdhanScreen(state)
+        PrayerState.IQOMAH -> IqomahScreen()
+        PrayerState.PRE_ADHAN -> PreAdhanScreen(state)
+        else -> NormalScreen(state, syncStatus, playbackViewModel, mosqueConfig, runningTextList)
     }
 }
 
