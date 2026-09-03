@@ -9,7 +9,6 @@ import com.jamdigitalmasjid.tv.data.local.PrayerScheduleDao
 import com.jamdigitalmasjid.tv.data.local.PrayerScheduleEntity
 import com.jamdigitalmasjid.tv.data.network.JdmApiService
 import com.jamdigitalmasjid.tv.data.network.PrayerScheduleDto
-import com.jamdigitalmasjid.tv.data.network.SourceMetadataDto
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -43,45 +42,14 @@ class PrayerRepositoryTest {
     }
 
     @Test
-    fun `getPrayerSchedule returns from backend and saves to DB`() = runTest {
+    fun `getPrayerSchedule returns from DB without hitting backend`() = runTest {
         val date = "2023-01-01"
         
         // Mock DataStore
         val prefs = mutablePreferencesOf(stringPreferencesKey("mosque_id") to "mosque-123")
         whenever(dataStore.data).thenReturn(flowOf(prefs))
-
-        // Mock API
-        val dto = PrayerScheduleDto(
-            date = date,
-            imsak = "04:00", subuh = "04:10", syuruq = "05:30", dzuhur = "12:00",
-            ashar = "15:00", maghrib = "18:00", isya = "19:00",
-            source = SourceMetadataDto("myQuran", null, null, null, "VALID", null)
-        )
-        whenever(apiService.getPrayerSchedule(any(), any())).thenReturn(Response.success(dto))
-
-        val result = repository.getPrayerSchedule(date)
-
-        assertNotNull(result)
-        assertEquals(date, result?.date)
-        assertEquals(false, result?.isOfflineCache)
-        assertEquals(false, result?.isStale)
         
-        // Verify it was saved
-        verify(prayerScheduleDao).insertSchedule(org.mockito.kotlin.any())
-    }
-
-    @Test
-    fun `getPrayerSchedule falls back to DB when backend fails`() = runTest {
-        val date = "2023-01-01"
-        
-        // Mock DataStore
-        val prefs = mutablePreferencesOf(stringPreferencesKey("mosque_id") to "mosque-123")
-        whenever(dataStore.data).thenReturn(flowOf(prefs))
-
-        // Mock API failure
-        whenever(apiService.getPrayerSchedule(any(), any())).thenThrow(RuntimeException("Network Error"))
-
-        // Mock DB fallback
+        // Mock DB
         val entity = PrayerScheduleEntity(
             mosqueId = "mosque-123",
             date = date, imsak = "04:00", subuh = "04:10", syuruq = "05:30", dzuhur = "12:00",
@@ -95,6 +63,32 @@ class PrayerRepositoryTest {
         assertNotNull(result)
         assertEquals(true, result?.isOfflineCache)
         assertEquals(false, result?.isStale) // Not > 24 hours
+        
+        // Verify API was NOT called
+        verifyNoInteractions(apiService)
+    }
+
+    @Test
+    fun `fetchPrayerScheduleFromNetwork calls API and saves to DB`() = runTest {
+        val date = "2023-01-01"
+        
+        // Mock DataStore
+        val prefs = mutablePreferencesOf(stringPreferencesKey("mosque_id") to "mosque-123")
+        whenever(dataStore.data).thenReturn(flowOf(prefs))
+
+        // Mock API
+        val dto = PrayerScheduleDto(
+            date = date,
+            imsak = "04:00", subuh = "04:10", syuruq = "05:30", dzuhur = "12:00",
+            ashar = "15:00", maghrib = "18:00", isya = "19:00",
+            sourceProvider = "myQuran"
+        )
+        whenever(apiService.getPrayerSchedule(any(), any())).thenReturn(Response.success(dto))
+
+        repository.fetchPrayerScheduleFromNetwork(date)
+        
+        // Verify it was saved
+        verify(prayerScheduleDao).insertSchedule(org.mockito.kotlin.any())
     }
 
     @Test
@@ -104,9 +98,6 @@ class PrayerRepositoryTest {
         // Mock DataStore
         val prefs = mutablePreferencesOf(stringPreferencesKey("mosque_id") to "mosque-123")
         whenever(dataStore.data).thenReturn(flowOf(prefs))
-
-        // Mock API failure
-        whenever(apiService.getPrayerSchedule(any(), any())).thenThrow(RuntimeException("Network Error"))
 
         // Mock DB fallback
         val entity = PrayerScheduleEntity(
@@ -131,9 +122,6 @@ class PrayerRepositoryTest {
         // Mock DataStore configured for Mosque B
         val prefs = mutablePreferencesOf(stringPreferencesKey("mosque_id") to "mosque-B")
         whenever(dataStore.data).thenReturn(flowOf(prefs))
-
-        // Mock API failure so it falls back to Room
-        whenever(apiService.getPrayerSchedule(any(), any())).thenThrow(RuntimeException("Network Error"))
 
         // Mock DAO: it only returns data if queried with mosque-A
         whenever(prayerScheduleDao.getScheduleByDate(org.mockito.kotlin.eq("mosque-A"), any())).thenReturn(

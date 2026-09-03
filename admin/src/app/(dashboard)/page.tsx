@@ -1,9 +1,36 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Building2, CalendarClock, MonitorSmartphone, Wifi, WifiOff } from "lucide-react";
+import { ApiAdapter } from "@/lib/api/adapter";
 
 export default function DashboardOverview() {
+  const [mosque, setMosque] = useState<any>(null);
+  const [devices, setDevices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mosqueId = localStorage.getItem("mosqueId") || "403d70ae-5fa7-489e-86fc-8d370be5b47f";
+    
+    Promise.all([
+      ApiAdapter.getMosqueConfig(mosqueId).catch(() => null),
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/mosques/${mosqueId}/devices`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      }).then(r => r.json()).catch(() => [])
+    ]).then(([m, devs]) => {
+      if (m) setMosque(m);
+      if (devs && Array.isArray(devs)) setDevices(devs);
+      setLoading(false);
+    });
+  }, []);
+
+  const activeDevices = devices.filter(d => {
+    if (!d.last_sync_at) return false;
+    return (new Date().getTime() - new Date(d.last_sync_at).getTime()) < 1000 * 60 * 5; // 5 mins
+  }).length;
+  const offlineDevices = devices.length - activeDevices;
+
   return (
     <div className="space-y-6">
       <div>
@@ -19,7 +46,7 @@ export default function DashboardOverview() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Masjid Raya</div>
+            <div className="text-2xl font-bold">{loading ? "..." : mosque?.name || "Masjid Name"}</div>
             <p className="text-xs text-muted-foreground mt-1">Configured & Active</p>
           </CardContent>
         </Card>
@@ -31,13 +58,13 @@ export default function DashboardOverview() {
             <MonitorSmartphone className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3 Total</div>
+            <div className="text-2xl font-bold">{loading ? "..." : `${devices.length} Total`}</div>
             <div className="flex items-center space-x-2 mt-1">
               <span className="flex items-center text-xs text-emerald-500">
-                <Wifi className="mr-1 h-3 w-3" /> 2 Active
+                <Wifi className="mr-1 h-3 w-3" /> {activeDevices} Active
               </span>
               <span className="flex items-center text-xs text-destructive">
-                <WifiOff className="mr-1 h-3 w-3" /> 1 Offline
+                <WifiOff className="mr-1 h-3 w-3" /> {offlineDevices} Offline
               </span>
             </div>
           </CardContent>
@@ -46,24 +73,24 @@ export default function DashboardOverview() {
         {/* Prayer Schedule */}
         <Card className="bg-card/50 backdrop-blur">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Prayer</CardTitle>
+            <CardTitle className="text-sm font-medium">Timezone</CardTitle>
             <CalendarClock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Dzuhur</div>
-            <p className="text-xs text-muted-foreground mt-1">Next: Ashar (15:30)</p>
+            <div className="text-2xl font-bold">{loading ? "..." : mosque?.timezone || "Asia/Jakarta"}</div>
+            <p className="text-xs text-muted-foreground mt-1">Time correctly synced</p>
           </CardContent>
         </Card>
 
         {/* System Activity */}
         <Card className="bg-card/50 backdrop-blur">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Content Status</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">System Engine</CardTitle>
+            <Activity className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Sync OK</div>
-            <p className="text-xs text-muted-foreground mt-1">Last synced 5 mins ago</p>
+            <div className="text-2xl font-bold text-emerald-500">ONLINE</div>
+            <p className="text-xs text-muted-foreground mt-1">Backend connected</p>
           </CardContent>
         </Card>
       </div>

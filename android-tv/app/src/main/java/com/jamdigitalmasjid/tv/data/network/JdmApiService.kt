@@ -8,16 +8,12 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-data class SourceMetadataDto(
-    val provider: String,
-    val reference: String?,
-    val version: String?,
-    val retrievedAt: String?,
-    val validationStatus: String,
-    val calculationMethod: String?
-)
+
+
+import com.google.gson.annotations.SerializedName
 
 data class PrayerScheduleDto(
+    @SerializedName("schedule_date")
     val date: String,
     val imsak: String?,
     val subuh: String,
@@ -26,7 +22,8 @@ data class PrayerScheduleDto(
     val ashar: String,
     val maghrib: String,
     val isya: String,
-    val source: SourceMetadataDto
+    @SerializedName("source_provider")
+    val sourceProvider: String
 )
 
 // --- Sync DTOs ---

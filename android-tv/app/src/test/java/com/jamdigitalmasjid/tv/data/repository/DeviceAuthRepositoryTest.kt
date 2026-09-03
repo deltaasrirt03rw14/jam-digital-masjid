@@ -68,7 +68,7 @@ class DeviceAuthRepositoryTest {
 
         repository.pairDevice("123456")
 
-        verify(credentialStore).saveApiKey(apiKey)
+        verify(credentialStore).saveApiKey(apiKey, "mosque-1")
         val state = repository.authState.value
         assertTrue(state is DeviceAuthState.Authenticated)
         assertEquals(deviceId, (state as DeviceAuthState.Authenticated).deviceId)
@@ -82,7 +82,7 @@ class DeviceAuthRepositoryTest {
 
         repository.pairDevice("999999")
 
-        verify(credentialStore, never()).saveApiKey(any())
+        verify(credentialStore, never()).saveApiKey(any(), any())
         val state = repository.authState.value
         assertTrue(state is DeviceAuthState.Error)
         assertEquals("Invalid or expired PIN", (state as DeviceAuthState.Error).message)

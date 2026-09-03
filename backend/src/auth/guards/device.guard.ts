@@ -26,6 +26,8 @@ export class DeviceGuard implements CanActivate {
     }
 
     const apiKey = authHeader.substring(7);
+    console.log("DeviceGuard params:", request.params);
+    console.log("DeviceGuard headers (keys):", Object.keys(request.headers));
     const deviceId = request.params.deviceId || request.headers['x-device-id'];
 
     if (!deviceId) {

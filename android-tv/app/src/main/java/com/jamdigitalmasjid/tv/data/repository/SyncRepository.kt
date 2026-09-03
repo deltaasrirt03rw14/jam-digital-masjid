@@ -59,6 +59,9 @@ class SyncRepository(
     private val dataStore: DataStore<Preferences>,
     private val authRepository: DeviceAuthRepository
 ) {
+    val mosqueConfigFlow = database.syncedMosqueConfigDao().getMosqueConfigFlow()
+    val runningTextFlow = database.syncedContentDao().getActiveTextContentsFlow()
+    
     companion object {
         private const val TAG = "SyncRepository"
 

@@ -35,13 +35,14 @@ class PrayerStateMachine(private val prayerEngine: PrayerEngine) {
     fun evaluateState(
         todaySchedule: PrayerSchedule?,
         tomorrowSchedule: PrayerSchedule?,
-        currentTimeMillis: Long
+        currentTimeMillis: Long,
+        timezone: String = "Asia/Jakarta"
     ): StateMachineResult {
         if (todaySchedule == null) {
             return StateMachineResult(PrayerState.FALLBACK, null, isOffline = true, isStale = false)
         }
 
-        val engineResult = prayerEngine.calculate(todaySchedule, tomorrowSchedule, currentTimeMillis)
+        val engineResult = prayerEngine.calculate(todaySchedule, tomorrowSchedule, currentTimeMillis, timezone)
         
         var baseState = PrayerState.NORMAL
 

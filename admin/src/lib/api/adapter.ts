@@ -34,7 +34,7 @@ function getAuthHeaders() {
   };
 }
 
-function handleResponse(res) {
+function handleResponse(res: any) {
   if (res.status === 401) {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
@@ -42,7 +42,9 @@ function handleResponse(res) {
       window.location.href = '/login';
     }
   }
+  return res;
 }
+
 export const ApiAdapter = {
   login: async (email: string, password: string) => {
     const res = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -71,7 +73,10 @@ export const ApiAdapter = {
       body: JSON.stringify(data),
     });
     handleResponse(res);
-    if (!res.ok) throw new Error("Failed to update mosque config");
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to update mosque config");
+    }
     return res.json();
   },
 

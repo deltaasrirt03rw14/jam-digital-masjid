@@ -12,6 +12,9 @@ interface SyncedMosqueConfigDao {
 
     @Query("SELECT * FROM synced_mosque_config WHERE mosqueId = :mosqueId")
     suspend fun getByMosqueId(mosqueId: String): SyncedMosqueConfigEntity?
+
+    @Query("SELECT * FROM synced_mosque_config ORDER BY lastSyncAt DESC LIMIT 1")
+    fun getMosqueConfigFlow(): kotlinx.coroutines.flow.Flow<SyncedMosqueConfigEntity?>
 }
 
 @Dao
@@ -24,6 +27,9 @@ interface SyncedContentDao {
 
     @Query("SELECT * FROM synced_contents WHERE mosqueId = :mosqueId AND status = 'ACTIVE' ORDER BY title ASC")
     suspend fun getActiveContents(mosqueId: String): List<SyncedContentEntity>
+
+    @Query("SELECT * FROM synced_contents WHERE status = 'ACTIVE' AND type = 'TEXT' ORDER BY title ASC")
+    fun getActiveTextContentsFlow(): kotlinx.coroutines.flow.Flow<List<SyncedContentEntity>>
 
     @Query("SELECT * FROM synced_contents WHERE status = 'ACTIVE' ORDER BY title ASC")
     suspend fun getAllActiveContents(): List<SyncedContentEntity>

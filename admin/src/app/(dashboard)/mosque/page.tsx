@@ -23,7 +23,8 @@ export default function MosqueConfigPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSave = async () => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!config) return;
     setSaving(true);
     try {
@@ -31,10 +32,18 @@ export default function MosqueConfigPage() {
       if (!mosqueId || mosqueId === "m1") {
         mosqueId = "403d70ae-5fa7-489e-86fc-8d370be5b47f";
       }
-      const updated = await ApiAdapter.updateMosqueConfig(mosqueId, config);
+      
+      const payload = {
+        ...config,
+        latitude: typeof config.latitude === 'string' ? parseFloat(config.latitude) : config.latitude,
+        longitude: typeof config.longitude === 'string' ? parseFloat(config.longitude) : config.longitude,
+      };
+
+      const updated = await ApiAdapter.updateMosqueConfig(mosqueId, payload);
       setConfig(updated);
-    } catch (e) {
-      setError("Failed to save changes");
+    } catch (e: any) {
+      console.error(e);
+      setError(e?.response?.data?.message || e.message || "Failed to save changes");
     } finally {
       setSaving(false);
     }
@@ -116,10 +125,6 @@ export default function MosqueConfigPage() {
                 />
               </div>
             </div>
-            
-            <p className="text-xs text-muted-foreground bg-primary/10 p-3 rounded-md mt-4">
-              <strong>Note:</strong> Currently running in mock mode. Changes are saved locally but will not persist to the PostgreSQL backend yet.
-            </p>
           </CardContent>
           <CardFooter className="border-t border-border/50 pt-6 flex justify-end">
             <Button type="submit" disabled={saving}>

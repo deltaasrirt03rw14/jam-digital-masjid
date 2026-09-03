@@ -21,7 +21,8 @@ export default function ContentPage() {
     scheduling: "",
     duration: 10,
     text: "",
-    media_id: ""
+    media_id: "",
+    slot: 1
   });
 
   const fetchData = async () => {
@@ -55,6 +56,7 @@ export default function ContentPage() {
         duration: content.content_data?.duration || 10,
         text: content.content_data?.text || "",
         media_id: content.content_data?.media_id || "",
+        slot: content.content_data?.slot || 1,
       });
     } else {
       setFormData({
@@ -65,7 +67,8 @@ export default function ContentPage() {
         scheduling: "",
         duration: 10,
         text: "",
-        media_id: ""
+        media_id: "",
+        slot: 1
       });
     }
     setIsModalOpen(true);
@@ -96,6 +99,7 @@ export default function ContentPage() {
       if (formData.type === "TEXT") {
         payload.content_data.text = formData.text;
         payload.content_data.duration = Number(formData.duration);
+        payload.content_data.slot = Number(formData.slot);
       } else {
         payload.content_data.media_id = formData.media_id;
         payload.content_data.duration = Number(formData.duration);
@@ -230,9 +234,18 @@ export default function ContentPage() {
                 )}
 
                 {formData.type === "TEXT" && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Text Content</label>
-                    <textarea required name="text" value={formData.text} onChange={handleChange} rows={3} className="w-full flex min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Text Content</label>
+                      <textarea required name="text" value={formData.text} onChange={handleChange} rows={3} className="w-full flex min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Slot Position</label>
+                      <select name="slot" value={formData.slot} onChange={handleChange} className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                        <option value="1">Slot 1 (Top)</option>
+                        <option value="2">Slot 2 (Bottom)</option>
+                      </select>
+                    </div>
                   </div>
                 )}
 

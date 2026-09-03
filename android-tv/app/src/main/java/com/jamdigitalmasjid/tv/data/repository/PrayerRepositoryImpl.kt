@@ -28,7 +28,24 @@ class PrayerRepositoryImpl(
             return null
         }
 
-        // Priority 1: Backend
+        // Priority 1: Room Cache (OFFLINE-FIRST)
+        val cachedEntity = prayerScheduleDao.getScheduleByDate(mosqueId, date)
+        if (cachedEntity != null) {
+            return mapToDomain(cachedEntity, isOfflineCache = true)
+        }
+
+        // Priority 2: Fallback calculation
+        // Handled at the Engine/ViewModel level if repository returns null
+        return null
+    }
+
+    suspend fun fetchPrayerScheduleFromNetwork(date: String): Boolean {
+        val mosqueId = getMosqueId()
+        if (mosqueId == null) {
+            Log.e("PrayerRepository", "Mosque ID is not configured in DataStore.")
+            return false
+        }
+
         try {
             val response = apiService.getPrayerSchedule(mosqueId, date)
             if (response.isSuccessful) {
@@ -44,31 +61,19 @@ class PrayerRepositoryImpl(
                         ashar = body.ashar,
                         maghrib = body.maghrib,
                         isya = body.isya,
-                        sourceProvider = body.source.provider,
+                        sourceProvider = body.sourceProvider,
                         lastSyncAt = System.currentTimeMillis()
                     )
                     prayerScheduleDao.insertSchedule(entity)
-                    return mapToDomain(entity, isOfflineCache = false)
+                    return true
                 }
             } else if (response.code() == 401 || response.code() == 403) {
                 Log.e("PrayerRepository", "Auth Error: ${response.code()}")
-                // Do not pretend it's a generic offline error if it's an auth error.
-                // Depending on requirements, we might want to throw an AuthException.
             }
         } catch (e: Exception) {
-            // Includes UnknownHostException, ConnectException, SocketTimeoutException
             Log.w("PrayerRepository", "Failed to fetch from backend: ${e.message}")
         }
-
-        // Priority 2: Room Cache
-        val cachedEntity = prayerScheduleDao.getScheduleByDate(mosqueId, date)
-        if (cachedEntity != null) {
-            return mapToDomain(cachedEntity, isOfflineCache = true)
-        }
-
-        // Priority 3: Fallback calculation
-        // Handled at the Engine/ViewModel level if repository returns null
-        return null
+        return false
     }
 
     private fun mapToDomain(entity: PrayerScheduleEntity, isOfflineCache: Boolean): PrayerSchedule {

@@ -21,7 +21,8 @@ data class PlaybackContent(
     val type: PlaybackType,
     val mediaFile: java.io.File?,
     val durationMs: Long = 10000L, // default 10 seconds for images
-    val textContent: String? = null
+    val textContent: String? = null,
+    val slot: Int = 1
 )
 
 class ContentSelector(
@@ -56,6 +57,7 @@ class ContentSelector(
             var mediaId: String? = null
             var durationMs: Long = 10000L
             var textBody: String? = null
+            var slot: Int = 1
 
             if (!content.contentData.isNullOrBlank()) {
                 try {
@@ -68,6 +70,9 @@ class ContentSelector(
                     }
                     if (json.has("text") && !json.get("text").isJsonNull) {
                         textBody = json.get("text").asString
+                    }
+                    if (json.has("slot") && !json.get("slot").isJsonNull) {
+                        slot = json.get("slot").asInt
                     }
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to parse contentData for ${content.id}: ${e.message}")
@@ -88,7 +93,8 @@ class ContentSelector(
                             title = content.title,
                             type = type,
                             mediaFile = status.localFile,
-                            durationMs = durationMs
+                            durationMs = durationMs,
+                            slot = slot
                         )
                     )
                 } else {
@@ -102,7 +108,8 @@ class ContentSelector(
                         type = type,
                         mediaFile = null,
                         durationMs = durationMs,
-                        textContent = textBody
+                        textContent = textBody,
+                        slot = slot
                     )
                 )
             }
