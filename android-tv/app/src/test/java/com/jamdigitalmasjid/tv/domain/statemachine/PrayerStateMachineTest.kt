@@ -11,7 +11,9 @@ class PrayerStateMachineTest {
 
     private val engine = PrayerEngine()
     private val stateMachine = PrayerStateMachine(engine)
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).apply {
+        timeZone = java.util.TimeZone.getTimeZone("Asia/Jakarta")
+    }
 
     private val sampleSchedule = PrayerSchedule(
         date = "2023-01-01",
