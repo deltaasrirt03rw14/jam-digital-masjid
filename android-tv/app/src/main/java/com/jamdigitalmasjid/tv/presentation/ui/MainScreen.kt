@@ -76,8 +76,8 @@ fun MainScreen(viewModel: MainViewModel, playbackViewModel: PlaybackViewModel) {
         }
     }
 
-    val mosqueConfig by viewModel.syncedMosqueConfig.collectAsState()
-    val runningTextList by viewModel.syncedRunningText.collectAsState()
+    val mosqueConfig by viewModel.mosqueConfig.collectAsState(initial = null)
+    val runningTextList by viewModel.runningText.collectAsState(initial = emptyList())
 
     when (state.activeState) {
         PrayerState.PRAYER_MODE -> PrayerModeScreen()
