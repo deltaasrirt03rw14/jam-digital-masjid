@@ -94,7 +94,7 @@ class MainViewModel(
                 val now = System.currentTimeMillis()
                 
                 // Get timezone from MosqueConfig, default to Asia/Jakarta
-                val mosqueConfigEntity = syncRepository.getMosqueConfigFlow().first()
+                val mosqueConfigEntity = syncRepository.mosqueConfigFlow.first()
                 val timezone = mosqueConfigEntity?.timezone ?: "Asia/Jakarta"
                 
                 // Use timezone to format dates correctly
